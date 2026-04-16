@@ -1,14 +1,14 @@
 <script setup>
 import {ref, onMounted} from 'vue'
-import axios from 'axios'
+import {queryAllApi} from '@/api/dept'
 
 //声明列表展示数据
 let deptList= ref([])
 
 //动态加载数据-查询部门
 const queryAll = async () => {
-  const result = await axios.get('https://apifoxmock.com/m1/3128855-1224313-default/depts')
-  deptList.value = result.data.data
+  const result = await queryAllApi()
+  deptList.value = result.data
 }
 
 //钩子函数
