@@ -222,6 +222,51 @@ const edit = async (id) => {
   }
 }
 
+//删除员工
+const deleteById = (id) => {
+  //弹出确认框
+  ElMessageBox.confirm('您确认删除该员工吗?','提示',
+    { confirmButtonText: '确认',cancelButtonText: '取消',type: 'warning'}
+  ).then(async () => { //确认
+    const result = await deleteApi(id);
+    if(result.code){
+      ElMessage.success('删除成功');
+      search();
+    }else{
+      ElMessage.error(result.msg);
+    }
+  }).catch(() => { //取消
+    ElMessage.info('您已取消删除');
+  })
+}
+//记录勾选的员工的id
+const selectedIds = ref([]);
+//复选框勾选发生变化时触发 - selection: 当前选中的记录 (数组)
+const handleSelectionChange = (selection) => {
+  selectedIds.value = selection.map( item => item.id);
+}
+
+//批量删除
+const deleteByIds = () => {
+  //弹出确认框
+  ElMessageBox.confirm('您确认删除该员工吗?','提示',
+    { confirmButtonText: '确认',cancelButtonText: '取消',type: 'warning'}
+  ).then(async () => { //确认
+    if(selectedIds.value && selectedIds.value.length > 0){
+      const result = await deleteApi(selectedIds.value);
+      if(result.code){
+        ElMessage.success('删除成功');
+        search();
+      }else{
+        ElMessage.error(result.msg);
+      }
+    }else {
+      ElMessage.info('您没有选择任何要删除的数据');
+    }
+  }).catch(() => { //取消
+    ElMessage.info('您已取消删除');
+  })
+}
 
 </script>
 
@@ -297,7 +342,7 @@ const edit = async (id) => {
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button type="primary" size="small" @click="edit(scope.row.id)"><el-icon><EditPen /></el-icon> 编辑</el-button>
-          <el-button type="danger" size="small" @click=""><el-icon><Delete /></el-icon> 删除</el-button>
+          <el-button type="danger" size="small" @click="deleteById(scope.row.id)"><el-icon><Delete /></el-icon> 删除</el-button>
         </template>
       </el-table-column>
     </el-table>
