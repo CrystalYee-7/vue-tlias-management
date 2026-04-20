@@ -1,5 +1,6 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
+import { queryPageApi } from '@/api/emp'
 
 const searchEmp = ref({
   name: '',
@@ -23,9 +24,18 @@ watch(
   }
 )
 
-const search= () => {
-  // 处理查询逻辑
+onMounted(() => {
+  search()
+})
+
+//查询员工
+const search= async () => {
   console.log('Search:', searchEmp.value)
+  const result = await queryPageApi(searchEmp.value.name, searchEmp.value.gender, searchEmp.value.begin, searchEmp.value.end, currentPage.value, pageSize.value);
+  if(result.code){
+    empList.value = result.data.rows
+    total.value = result.data.total
+  }
 }
 
 const clear = () => {
@@ -41,23 +51,7 @@ const clear = () => {
 }
 
 // 示例数据
-const empList = ref([
-   {
-        "id": 1,
-        "username": "jinyong",
-        "password": "123456",
-        "name": "金庸",
-        "gender": 1,
-        "image": "https://web-framework.oss-cn-hangzhou.aliyuncs.com/2022-09-02-00-27-53B.jpg",
-        "job": 2,
-        "salary": 8000,
-        "entryDate": "2015-01-01",
-        "deptId": 2,
-        "deptName": "教研部",
-        "createTime": "2022-09-01T23:06:30",
-        "updateTime": "2022-09-02T00:29:04"
-  }
-])
+const empList = ref([])
 
 // 分页配置
 const currentPage = ref(1)
@@ -71,7 +65,6 @@ const handleSizeChange = (val) => {
 const handleCurrentChange = (val) => {
   search()
 }
-
 
 </script>
 
@@ -111,18 +104,18 @@ const handleCurrentChange = (val) => {
   <el-button type="danger" @click=""> - 批量删除</el-button>
   <br><br>
 
-<!-- 表格 -->
+  <!-- 表格 -->
   <el-table :data="empList" border style="width: 100%">
     <el-table-column type="selection" width="55" align="center"></el-table-column>
     <el-table-column prop="name" label="姓名" width="120" align="center"></el-table-column>
-    <el-table-column label="性别" width="170" align="center">
+    <el-table-column label="性别" width="80" align="center">
       <template #default="scope" >
         {{ scope.row.gender == 1 ? '男' : '女' }}
       </template>
     </el-table-column>
     <el-table-column label="头像" width="170" align="center">
       <template #default="scope" >
-        <img :src="scope.row.image" alt="Avatar" class="avatar" />
+        <img :src="scope.row.image" class="avatar" />
       </template>
     </el-table-column>
     <el-table-column prop="deptName" label="部门名称" width="170" align="center"></el-table-column>
@@ -134,7 +127,7 @@ const handleCurrentChange = (val) => {
           <span v-else-if="scope.row.job == 4">教研主管</span>
           <span v-else-if="scope.row.job == 5">咨询师</span>
           <span v-else>其他</span>
-        </template>
+      </template>
     </el-table-column>
     <el-table-column prop="entryDate" label="入职日期" width="180" align="center"></el-table-column>
     <el-table-column prop="updateTime" label="最后操作时间" width="210" align="center"></el-table-column>
@@ -150,21 +143,20 @@ const handleCurrentChange = (val) => {
 
   <!-- 分页 -->
   <el-pagination
-    @size-change="handleSizeChange"
-    @current-change="handleCurrentChange"
-    v-model:current-page="currentPage"
-    v-model:page-size="pageSize"
-    :page-sizes="[10, 20, 30, 40]"
-    layout="total, sizes, prev, pager, next, jumper"
-    :total="total"
-  >
-  </el-pagination>
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
+      :page-sizes="[5, 10, 20, 30, 50, 75, 100]"
+      :background="background"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    >
+    </el-pagination>
 </template>
 
 <style scoped>
 .avatar {
   height: 40px;
 }
-</style>┌─────────────────────────────────────────────────────────┐
-│ 共 100 条  每页 10条  上一页  1  2  3  4  5  ... 10  下一页  跳转到[ 2 ]页 │
-└─────────────────────────────────────────────────────────┘
+</style>
