@@ -76,6 +76,8 @@ const save = async () => {
       queryAll()
     }else {
       ElMessage.error(result.msg)
+      // 清空表单内容，方便用户重新输入
+      deptForm.value.name = ''
     }
   })
 }
