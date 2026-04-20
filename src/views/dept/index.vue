@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { queryAllApi, addDeptApi } from '@/api/dept'
+import { queryAllApi, addDeptApi, queryInfoApi, updateDeptApi } from '@/api/dept'
 
 // 声明列表展示数据
 let deptList= ref([])
@@ -18,9 +18,16 @@ onMounted(() => {
 })
 
 // 编辑部门 - 根据ID查询回显数据
-const handleEdit = (id) => {
+const handleEdit = async (id) => {
   console.log(`Edit item with ID ${id}`);
-  // 在这里实现编辑功能
+  formTitle.value = '修改部门'
+  showDialog.value = true
+  deptForm.value = {name: ''}
+
+  const result = await queryInfoApi(id)
+  if(result.code){
+    deptForm.value = result.data
+  }
 };
 
 // 删除部门 - 根据ID删除部门
@@ -65,7 +72,12 @@ const save = async () => {
   await deptFormRef.value.validate(async valid => {
     if (!valid) return
     // 提交表单
-    const result = await addDeptApi(deptForm.value)
+    let result = null;
+    if(deptForm.value.id){
+      result = await updateDeptApi(deptForm.value) // 修改
+    }else{
+      result = await addDeptApi(deptForm.value) // 新增
+    }
     if(result.code){
       ElMessage.success('操作成功')
       // 关闭对话框
@@ -117,7 +129,6 @@ const save = async () => {
       </span>
     </template>
   </el-dialog>
-
 </template>
 
 <style scoped>
