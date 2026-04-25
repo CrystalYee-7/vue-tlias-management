@@ -26,11 +26,23 @@ watch(() => searchEmp.value.date, (newVal, oldVal) => {
   }
 })
 
+//声明token
+const token = ref('')
+
 //钩子函数
 onMounted(() => {
   search(); //查询员工列表数据
   queryAllDepts();//查询所有部门列表数据
+  getToken(); // 获取token
 })
+
+// 获取token
+const getToken = () => {
+  const loginUser = JSON.parse(localStorage.getItem('loginUser'))
+  if (loginUser && loginUser.token) {
+    token.value = loginUser.token
+  }
+}
 
 //查询所有部门数据
 const queryAllDepts = async () => {
@@ -437,6 +449,7 @@ const deleteByIds = () => {
             <el-upload
               class="avatar-uploader"
               action="/api/upload"
+              :headers="{'token': token}"
               :show-file-list="false"
               :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload"
